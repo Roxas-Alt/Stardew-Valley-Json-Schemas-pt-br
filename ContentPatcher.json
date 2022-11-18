@@ -10,7 +10,7 @@
 			"title": "Schema",
 			"description": "Uma referência para esse esquema JSON. Não faz parte do formato atual, mas é útil para ferramentas de validação",
 			"type": "string",
-			"const": "ContentPatcher.json"
+			"const": "https://raw.githubusercontent.com/Roxas-Alt/Stardew-Valley-Json-Schemas-pt-br/main/ContentPatcher.json"
 		},
 		"Format": {
 			"title": "Versão do Content Patcher",
