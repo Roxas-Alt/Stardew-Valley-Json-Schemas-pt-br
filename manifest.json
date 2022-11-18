@@ -1,0 +1,151 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "file:///C:/Schema/manifest.json",
+	"title": "SMAPI manifest",
+	"description": "Arquivo Manifest para o SMAPI",
+	"@documentationUrl": "https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Manifest",
+
+	"allowComments": true,
+	"allowTrailingCommas": true,
+
+	"type": "object",
+	"properties": {
+		"Name": {
+			"title": "Nome do Mod",
+			"description": "O nome de exibição do mod. O SMAPI usa isso em mensagens, logs e erros.",
+			"type": "string",
+			"examples": ["Lookup Anything"]
+		},
+		"Author": {
+			"title": "Autor do Mod",
+			"description": "O nome de quem criou o mod. O ideal é incluir o nome de usuário usado para publicar os mods.",
+			"type": "string",
+			"examples": ["Pathoschild"]
+		},
+		"Version": {
+			"title": "Versão do Mod",
+			"description": "A versão semântica do mod. Certifique-se de atualizá-lo a cada lançamento! O SMAPI usa isso para verificar atualizações, dependências de mod e listas negras de compatibilidade (se o mod quebrar em uma versão futura do jogo).",
+			"$ref": "#/definitions/SemanticVersion"
+		},
+		"Description": {
+			"title": "Descrição do Mod",
+			"description": "Uma breve explicação sobre o que seu mod faz (uma ou duas frases), mostrada no log SMAPI.",
+			"type": "string",
+			"examples": ["View metadata about anything by pressing a button."]
+		},
+		"UniqueID": {
+			"title": "ID exclusivo do Mod",
+			"description": "Um identificador exclusivo para o teu mod. O formato recomendado é \"TeuNome.NomeDoMod\", sem espaços ou caracteres especiais. O SMAPI usa isso para verificar atualizações, dependências de mod e listas negras de compatibilidade (se o mod quebrar em uma versão futura do jogo). Quando outro mod precisa fazer referência a este mod, ele usa o ID exclusivo.",
+			"$ref": "#/definitions/ModID"
+		},
+		"EntryDll": {
+			"title": "Carregamento de DLL do mod",
+			"description": "O nome do arquivo DLL que o SMAPI deve carregar para este mod. Mutuamente exclusivo com o ContentPackFor.",
+			"type": "string",
+			"pattern": "^.+\\.[Dd][Ll][Ll]$",
+			"examples": ["LookupAnything.dll"],
+			"@errorMessages": {
+				"pattern": "Valor inválido; deve ser um nome de arquivo que termine com \".dll\"."
+			}
+		},
+		"ContentPackFor": {
+			"title": "Pacote de conteúdo para",
+			"description": "Especifica o mod que pode ler este pacote de conteúdo.",
+			"type": "object",
+			"properties": {
+				"UniqueID": {
+					"title": "ID exclusivo obrigatório",
+					"description": "O ID exclusivo do mod que pode ler este pacote de conteúdo.",
+					"$ref": "#/definitions/ModID"
+				},
+				"MinimumVersion": {
+					"title": "Versão mínima exigida",
+					"description": "A versão mínima do mod que pode ler este pacote de conteúdo, se aplicável.",
+					"$ref": "#/definitions/SemanticVersion"
+				}
+			},
+			"required": ["UniqueID"]
+		},
+		"MinimumApiVersion": {
+			"title": "Versão mínima da API",
+			"description": "A versão mínima do SMAPI necessária para usar este mod. Se um jogador tentar usar o mod com uma versão mais antiga do SMAPI, ele verá uma mensagem amigável dizendo que precisa atualizar o SMAPI. Isso também serve como um proxy para a versão mínima do jogo, uma vez que o próprio SMAPI aplica uma versão mínima do jogo.",
+			"$ref": "#/definitions/SemanticVersion"
+		},
+		"Dependencies": {
+			"title": "Dependências do Mod",
+			"description": "Especifica quais outros mods serão carregados antes deste mod. Se uma dependência for necessária e um jogador tentar usar o mod sem a dependência instalada, o mod não será carregado e eles verão uma mensagem amigável dizendo que precisam instalá-los.",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"UniqueID": {
+						"title": "ID exclusivo da dependência",
+						"description": "O ID exclusivo do mod a ser carregado primeiro.",
+						"$ref": "#/definitions/ModID"
+					},
+					"MinimumVersion": {
+						"title": "Versão mínima da dependência",
+						"description": "A versão mínima do mod a ser carregada primeiro, se aplicável.",
+						"$ref": "#/definitions/SemanticVersion"
+					},
+					"IsRequired": {
+						"title": "A dependência é obrigatória",
+						"description": "Determina se a dependência é obrigatória.\nInfo. True é o valor padrão se não for especificado"
+					}
+				},
+				"required": ["UniqueID"]
+			}
+		},
+		"UpdateKeys": {
+			"title": "Chaves de atualização do Mod",
+			"description": "Especifica onde o SMAPI deve verificar se há atualizações de mod, para que possa alertar o usuário com um link para sua página de mod. Veja https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Manifest#Update_checks para mais informações.",
+			"type": "array",
+			"items": {
+				"type": "string",
+				"pattern": "^(Chucklefish:\\d+|CurseForge:\\d+|GitHub:[A-Za-z0-9\\_\\-]+\\/[A-Za-z0-9\\_\\-]+|ModDrop:\\d+|Nexus:\\d+)(?:@[a-zA-Z0-9\\_\\-]+)?$",
+				"examples": ["Chucklefish:","CurseForge:","GitHub:","ModDrop:","Nexus:"],
+				"@errorMessages": {
+					"pattern": "Chave de atualização inválida; veja https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Manifest#Update_checks para mais informações."
+				}
+			}
+		},
+		"$schema": {
+			"title": "Schema",
+			"description": "Uma referência para esse esquema JSON. Não faz parte do formato atual, mas é útil para ferramentas de validação.",
+			"type": "string",
+			"const": "file:///C:/Schema/manifest.json"
+		}
+	},
+	"definitions": {
+		"SemanticVersion": {
+			"type": "string",
+			"pattern": "^(?:[0-9]\\d*\\.[0-9]\\d*)(?:\\.(?:[0-9]\\d*))?(?:\\-(?:[a-zA-Z0-9]+[\\-\\.]?)+)?$",
+			"$comment": "derivado de SMAPI.Toolkit.SemanticVersion",
+			"examples": ["1.0", "1.0-alpha.1", "1.0.0", "1.0.0-alpha.1"],
+			"@errorMessages": {
+				"pattern": "Versão semântica inválida; deve estar formatado como 1.2.0 ou 1.2.0-prerelease.tags. Veja https://semver.org/ para mais informações."
+			}
+		},
+		"ModID": {
+			"type": "string",
+			"pattern": "^[a-zA-Z0-9\\_\\.\\-]+$",
+			"$comment": "derivado de SMAPI.Toolkit.Utilities.PathUtilities.IsSlug",
+			"examples": ["Pathoschild.LookupAnything"]
+		}
+	},
+
+	"required": ["Name", "Author", "Version", "Description", "UniqueID"],
+	"oneOf": [
+		{
+			"required": ["EntryDll"]
+		},
+		{
+			"required": ["ContentPackFor"]
+		}
+	],
+	"additionalProperties": false,
+	"@errorMessages": {
+		"oneOf:valid against no schemas": "Campo obrigatório ausente: EntryDll ou ContentPackFor.",
+		"oneOf:valid against more than one schema": "Não é possível especificar EntryDll e ContentPackFor, pois eles são mutuamente exclusivos."
+	}
+}

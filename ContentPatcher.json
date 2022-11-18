@@ -1,0 +1,999 @@
+{
+	"$schema": "http://json-schema.org/schema",
+	"$id": "https://smapi.io/schemas/content-patcher.json",
+	"title": "Content Patcher",
+	"description": "Para mods que usam o Content Patcher.\nDocumentação: https://github.com/Pathoschild/StardewMods/tree/develop/ContentPatcher#readm",
+	"type": "object",
+
+	"properties": {
+		"$schema": {
+			"title": "Schema",
+			"description": "Uma referência para esse esquema JSON. Não faz parte do formato atual, mas é útil para ferramentas de validação",
+			"type": "string",
+			"const": "ContentPatcher.json"
+		},
+		"Format": {
+			"title": "Versão do Content Patcher",
+			"description": "A versão do Content Patcher a ser utilizada. Você deve sempre usar a versão mais recente para habilitar os recursos mais recentes, evitar comportamentos obsoletos e reduzir o tempo de carregamento.\nVersão atual: 1.28.0 ou 1.28.3",
+			"type": "string",
+			"pattern": "^1\\.28\\.[0-3]$"
+		},
+		"ConfigSchema": {
+			"title": "Esquema de configuração",
+			"description": "Define o formato do config.json. Possibilita adicionar configurações que podem ser modificadas pelo jogador pelo config.json ou uma Interface de Configuração.",
+			"type": "object",
+			"additionalProperties": {
+				"type": "object",
+				"title": "Nome da opção",
+				"description": "Define o nome da opção.\nChave i18n: config.NOME DA OPÇÂO.name",
+				"properties": {
+					"AllowValues": {
+						"title": "Valores permitidos",
+						"description": "Os valores que o player pode fornecer. As string são delimitada por vírgulas. Se ausente, qualquer valor é permitido. Dica: para sinalizar uma booleana, use \"true, false\".\nDica: True = Verdadeiro; False = Falso.\nChave i18n: config.NOME DA OPÇÂO.values.VALOR\n(OBS. uma chave para cada valor. EX: config.NOME.values.MADEIRA e config.NOME.values.PEDRA)",
+						"type": "string"
+					},
+					"AllowBlank": {
+						"title": "Permitir campo em branco",
+						"description": "Determina se o campo pode ser deixado em branco. Se for falso ou indefinido, os campos em branco serão substituídos pelo valor padrão.\nValores permitido: True para verdadeiro; False para falso.",
+						"type": "boolean"
+					},
+					"AllowMultiple": {
+						"title": "Permitir vários valores",
+						"description": "Determina se o player pode especificar vários valores delimitados por vírgula. Considera-se falso caso não seja determinado.\nValores permitido: True para verdadeiro; False para falso.",
+						"type": "boolean"
+					},
+					"Default": {
+						"title": "Valor padrão",
+						"description": "O valor padrão usado quando a opção está em branco e AllowBlank é falso. Pode conter vários valores delimitados por vírgulas se AllowMultiple for verdadeiro.\nObrigatório quando AllowBlank for igual a false ou for indefinido.",
+						"type": "string"
+					},
+					"Description": {
+						"title": "Descrição",
+						"description": "Uma explicação opcional da configuração. Mostrada em Interfaces de Configuração como o Generic Mod Config Menu.\nChave i18n: config.NOME DA OPÇÂO.description",
+						"type": "string"
+					},
+					"Section": {
+						"title": "Seção",
+						"description": "Adiciona a opção dentro de uma seção para manter as opções organizadas nas Interfaces de Configuração.\nChave i18n: config.section.SEÇÃO.name\n(Descrição): config.section.SEÇÃO.description",
+						"type": "string"
+					}
+				},
+
+				"allOf": [
+					{
+						"if": {
+							"properties": {
+								"AllowBlank": {
+									"const": false
+								}
+							}
+						},
+						"then": {
+							"required": ["Default"]
+						}
+					}
+				],
+
+				"additionalProperties": false
+			}
+		},
+		"CustomLocations": {
+			"title": "Locais personalizados",
+			"description": "Permite que você adicione novos locais no jogo, completos e com seus próprios mapas e Warps (Teletransporte)",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"Name": {
+						"title": "Nome",
+						"description": "O nome interno exclusivo do local. Não pode conter tokens. O nome deve começar com 'Custom_' (para evitar conflito com locais vanilla atuais ou futuros), pode conter apenas caracteres alfanuméricos ou sublinhados, o nome do local deve ter três partes separadas por sublinhado (X_Y_Z) e deve ser *globalmente* exclusivo. Prefixá-lo com o nome do seu mod é altamente recomendado.\nEx: 'Custom_NomeDoMod_NomeDoMapa'.",
+						"type": "string",
+						"examples": ["Custom_NomeDoMod_NomeDoMapa", "Custom_IlhaMaravilhaMod_PraiaEncantada"],
+						"pattern": "^Custom_.+_.+$"
+					},
+					"FromMapFile": {
+						"title": "Arquivo do mapa",
+						"description": "O caminho do arquivo do mapa relativo a pasta do mod (o arquivo pode ser .tmx, .tbin ou .xnb). Não pode conter tokens, mas você pode fazer alterações condicionais usando EditMap. Não deve conter subida de diretório ( ../ ).",
+						"type": "string",
+						"examples": ["assets/maps/NomeDoMapa.tbin"],
+						"allOf": [
+							{
+								"not": {
+									"pattern": "\\.\\.[\\/\\\\]"
+								}
+							},
+							{
+								"pattern": "\\.([tT][bB][iI][nN]|[tT][mM][xX]|[xX][nN][bB])$"
+							}
+						]
+					},
+					"MigrateLegacyNames": {
+						"title": "Migrar nomes antigos",
+						"description": "Uma lista opcional com antigos nomes de localizações. Ao tentar carregar uma localização pelo nome mas não encontrar nada, o jogo pode carregar outra localização contendo esse mesmo nome dentro de sua lista de nomes antigos, substituindo o nome antigo pelo atual na próxima vez que o jogo for salvo. Não pode conter tokens. Isso serve apenas para permitir a migração de locais antigos ou a troca do nome.\nOs nome antigos devem ser globalmente exclusivos. Eles não podem corresponder ao Name ou MigrateLegacyNames de nenhum outro local, incluindo aqueles adicionados por outro mod, e não podem corresponder a nenhum nome de localização vanilla.",
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"When":{
+						"$ref": "#/definitions/When"
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"DynamicTokens": {
+			"title": "Tokens dinâmicos",
+			"description": "Tokens personalizados que você pode usar.",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"Name": {
+						"title": "Nome",
+						"description": "O nome do token a ser usado pelo tokens & conditions.",
+						"type": "string"
+					},
+					"Value": {
+						"title": "Valor do token",
+						"description": "O(s) valor(es) a definir. Pode ser um valor delimitado por vírgulas para fornecer vários valores. Se algum token possuir vários valores, ele só poderá ser usado em condições. Este campo suporta tokens, incluindo tokens dinâmicos definidos antes desta entrada.",
+						"type": "string"
+					},
+					"When": {
+						"title": "Quando verdadeiro (Condição)",
+						"description": "Defina o valor do token apenas quando todas as condições fornecidas forem verdadeiras. Se não for especificado, a condição sempre será verdadeira.",
+						"$ref": "#/definitions/Condition"
+					}
+				},
+
+				"required": ["Name", "Value"],
+				"additionalProperties": false
+			}
+		},
+		"AliasTokenNames": {
+			"title": "Nomes de tokens alternativos",
+			"description": "Define um nome alternativo e opcional para tokens existentes. Isso afeta apenas o seu mod e você pode usar tanto o nome alternativo quanto o nome do token original. Mais útil para tokens personalizados fornecidos por outros mods, que geralmente têm nomes mais longos. Cada chave de entrada é o nome alternativo, e o valor é o nome do token original.\nEx: \"NomeAlternativo\":\"TokenOriginal\"",
+			"type": "object",
+			"additionalProperties": {
+				"type": "string"
+			}
+		},
+		"Changes": {
+			"title": "Alterações",
+			"description": "As alterações que você deseja fazer. Cada entrada é chamada de patch e descreve uma ação específica a ser executada: substituir este arquivo por aquele, copiar esta imagem para o arquivo tal, etc. Você pode listar qualquer número de patches que desejar.",
+			"type": "array",
+			"items": {
+				"properties": {
+					"Action": {
+						"title": "Ação",
+						"description": "O tipo de alteração a fazer.",
+						"type": "string",
+						"enum": ["Load", "EditImage", "EditData", "EditMap", "Include"]
+					}
+				},
+
+				"if": {"properties": {"Action": false}},
+				"then": {
+					"required": ["Action"]
+				},
+				"else": {
+					"if": {"properties": {"Action": {"const": "Load"}}},
+					"then": {
+						"properties": {
+							"FromFile": {
+								"$ref": "#/definitions/FromFile"
+							},
+							"LogName": {
+								"$ref": "#/definitions/LogName"
+							},
+							"Target": {
+								"$ref": "#/definitions/Target"
+							},
+							"Update": {
+								"$ref": "#/definitions/Update"
+							},
+							"When": {
+								"$ref": "#/definitions/When"
+							}
+						},
+						"required": ["FromFile", "Target"],
+						"propertyNames": {
+							"enum": ["Action", "FromFile", "LogName", "Target", "Update", "When"]
+						}
+					},
+					"else": {
+						"if": {"properties": {"Action": {"const": "EditImage"}}},
+						"then": {
+							"properties": {
+								"PatchMode": {
+									"$ref": "#/definitions/PatchMode"
+								},
+								"FromFile": {
+									"$ref": "#/definitions/FromFileDescription3"
+								},
+								"LogName": {
+									"$ref": "#/definitions/LogName"
+								},
+								"Target": {
+									"$ref": "#/definitions/Target"
+								},
+								"Update": {
+									"$ref": "#/definitions/Update"
+								},
+								"When": {
+									"$ref": "#/definitions/When"
+								},
+								"FromArea": {
+									"$ref": "#/definitions/FromArea"
+								},
+								"ToArea": {
+									"$ref": "#/definitions/ToArea"
+								}
+							},
+							"required": ["FromFile", "Target"],
+							"propertyNames": {
+								"enum": ["Action", "FromFile", "LogName", "Target", "Update", "When", "FromArea", "PatchMode", "ToArea"]
+							}
+						},
+						"else": {
+							"if": {"properties": {"Action": {"const": "EditData"}}},
+							"then": {
+								"properties": {
+									"LogName": {
+										"$ref": "#/definitions/LogName"
+									},
+									"Target": {
+										"$ref": "#/definitions/Target"
+									},
+									"Update": {
+										"$ref": "#/definitions/Update"
+									},
+									"When": {
+										"$ref": "#/definitions/When"
+									},
+									"TargetField": {
+										"$ref": "#/definitions/TargetField"
+									},
+									"Entries": {
+										"$ref": "#/definitions/Entries"
+									},
+									"Fields": {
+										"$ref": "#/definitions/Fields"
+									},
+									"MoveEntries": {
+										"$ref": "#/definitions/MoveEntries"
+									},
+									"TextOperations": {
+										"$ref": "#/definitions/TextOperations"
+									}
+								},
+								"required": ["Target"],
+
+								"if": {
+									"properties": {
+										"Entries": false,
+										"Fields": false,
+										"MoveEntries": false,
+										"TextOperations": false
+									}
+								},
+								"then": {
+									"required": ["Entries", "Fields", "MoveEntries", "TextOperations"]
+								},
+
+								"propertyNames": {
+									"enum": ["Action", "LogName", "Target", "Update", "When", "TargetField", "Entries", "Fields", "MoveEntries", "TextOperations"]
+								}
+							},
+							"else": {
+								"if": {"properties": {"Action": {"const": "EditMap"}}},
+								"then": {
+									"properties": {
+										"FromFile": {
+											"$ref": "#/definitions/FromFileDescription2"
+										},
+										"FromArea": {
+											"$ref": "#/definitions/FromAreaDescription2"
+										},
+										"ToArea": {
+											"$ref": "#/definitions/ToAreaDescription2"
+										},
+										"PatchMode": {
+											"$ref": "#/definitions/PatchModeDescription2"
+										},
+										"LogName": {
+											"$ref": "#/definitions/LogName"
+										},
+										"Target": {
+											"$ref": "#/definitions/Target"
+										},
+										"Update": {
+											"$ref": "#/definitions/Update"
+										},
+										"When": {
+											"$ref": "#/definitions/When"
+										},
+										"AddWarps": {
+											"$ref": "#/definitions/AddWarps"
+										},
+										"TextOperations": {
+											"$ref": "#/definitions/TextOperationsDescription2"
+										},
+										"MapProperties": {
+											"$ref": "#/definitions/MapProperties"
+										},
+										"MapTiles": {
+											"$ref": "#/definitions/MapTiles"
+										}
+									},
+									"required": ["Target"],
+
+									"if": {
+										"properties": {
+											"FromFile": false,
+											"MapProperties": false,
+											"AddWarps": false,
+											"TextOperations": false,
+											"MapTiles": false
+										}
+									},
+									"then": {
+										"required": ["FromFile","MapProperties","AddWarps","TextOperations","MapTiles"]
+									},
+
+									"propertyNames": {
+										"enum": ["Action", "FromFile", "LogName", "Target", "Update", "When", "AddWarps", "FromArea", "MapProperties", "MapTiles", "PatchMode", "TextOperations", "ToArea"]
+									}
+								},
+								"else": {
+									"if": {"properties": {"Action": {"const": "Include"}}},
+									"then": {
+										"properties": {
+											"FromFile": {
+												"$ref": "#/definitions/FromFileDescription4"
+											},
+											"LogName": {
+												"$ref": "#/definitions/LogName"
+											},
+											"Update": {
+												"$ref": "#/definitions/Update"
+											},
+											"When": {
+												"$ref": "#/definitions/When"
+											}
+										},
+										"required": ["FromFile"],
+										"propertyNames": {
+											"enum": ["Action", "FromFile", "LogName", "Update", "When"]
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"definitions": {
+		"Condition": {
+			"type": "object",
+			"additionalProperties": {
+				"type": ["boolean", "string"]
+			}
+		},
+		"Position": {
+			"type": "object",
+			"properties": {
+				"X": {
+					"title": "Posição X",
+					"description": "A posição X do canto superior esquerdo da área, medida em pixels para uma textura e tiles para um mapa. Pode conter tokens.",
+					"type": ["integer", "string"],
+					"minimum": 0
+				},
+				"Y": {
+					"title": "Posição Y",
+					"description": "A posição Y do canto superior esquerdo da área, medida em pixels para uma textura e tiles para um mapa. Pode conter tokens.",
+					"type": ["integer", "string"],
+					"minimum": 0
+				}
+			},
+
+			"required": ["X", "Y"],
+			"additionalProperties": false
+		},
+		"Rectangle": {
+			"type": "object",
+			"properties": {
+				"X": {
+					"title": "Posição X",
+					"description": "A posição X do canto superior esquerdo da área, medida em pixels para uma imagem e tiles para um mapa. Pode conter tokens.",
+					"type": ["integer", "string"],
+					"minimum": 0
+				},
+				"Y": {
+					"title": "Posição Y",
+					"description": "A posição Y do canto superior esquerdo da área, medida em pixels para uma imagem e tiles para um mapa. Pode conter tokens.",
+					"type": ["integer", "string"],
+					"minimum": 0
+				},
+				"Width": {
+					"title": "Largura",
+					"description": "A largura da área, medida em pixels para uma imagem e tiles para um mapa. Pode conter tokens.",
+					"type": ["integer", "string"],
+					"minimum": 0
+				},
+				"Height": {
+					"title": "Altura",
+					"description": "A altura da área, medida em pixels para uma imagem e tiles para um mapa. Pode conter tokens.",
+					"type": ["integer", "string"],
+					"minimum": 0
+				}
+			},
+
+			"required": ["X", "Y", "Width", "Height"],
+			"additionalProperties": false
+		},
+		"Target": {
+			"title": "Alvo",
+			"description": "O recurso do jogo que você deseja atingir (ou vários recursos delimitados por vírgulas). Este é o caminho do arquivo dentro da pasta Content do seu jogo, retirando a extensão do arquivo ou idioma (como Maps/Casa para editar Content/Maps/Casa.xnb). Este campo suporta tokens e a capitalização não importa. Suas alterações são aplicadas em todos os idiomas, a menos que você especifique uma condição de idioma.\nNão deve incluir a pasta 'Content/', a extensão '.xnb' ou o código de localidade como 'pt-br'.",
+			"type": "string",
+			"not": {
+				"pattern": "[cC][oO][nN][tT][eE][nN][tT][/\\\\]|\\.[xX][nN][bB]$|\\.[a-zA-Z][a-zA-Z]\\-[a-zA-Z][a-zA-Z](?:\\.[xX][nN][bB])?$"
+			}
+		},
+		"LogName": {
+			"title": "Nome de registro do patch",
+			"description": "Um nome para este patch que será mostrado nas mensagens do log. Isso é muito útil para compreender erros; se não for especificado, será padronizado para algum nome como 'entrada #14 (EditMap maps/casa)'.",
+			"type": "string"
+		},
+		"Update": {
+			"title": "Atualização",
+			"description": "Determina quando o patch deve ser atualizado. Os valores possíveis são 'OnDayStart', 'OnLocationChange' ou 'OnTimeChange' (o padrão é OnDayStart).\nVocê pode inserir apenas um deles ou uma combinação delimitada por vírgulas",
+			"type": "string",
+			"examples": ["OnDayStart", "OnDayStart, OnLocationChange, OnTimeChange"],
+			"pattern": "^((OnDayStart|OnLocationChange|OnTimeChange), )*(OnDayStart|OnLocationChange|OnTimeChange)$"
+		},
+		"FromFile": {
+			"title": "Arquivo fonte",
+			"description": "O caminho do arquivo relativo a pasta do mod (como 'assets/maps/casa.tbin') ou vários caminhos delimitados por vírgula. Este campo suporta a tokens e a capitalização não importa. Pode ser um arquivo .json (dados), .png (imagem), .tbin ou .tmx (mapa) ou .xnb. Não deve conter subida de diretório ( ../ ).",
+			"type": "string",
+			"allOf": [
+				{
+					"not": {
+						"pattern": "\\.\\.[\\/\\\\]"
+					}
+				},
+				{
+					"pattern": "\\.([jJ][sS][oO][nN]|[pP][nN][gG]|[tT][bB][iI][nN]|[tT][mM][xX]|[xX][nN][bB])$"
+				}
+			]
+		},
+		"FromFileDescription2": {
+			"title": "Mapa fonte",
+			"description": "O caminho do mapa relativo a pasta do mod (como assets/town.tbin). Pode ser um arquivo .tbin, .tmx ou .xnb e não deve conter subida de diretório ( ../ ). Este campo suporta tokens e letras maiúsculas não importam.\nO Content Patcher irá lidar com os tilesheets referenciados pelo FromFile de mapas para você:\n - Se um tilesheet não for referenciado pelo mapa-alvo, o Content Patcher irá adicioná-lo para você (com o prefixo z_ para evitar conflitos com a lógica codificada do jogo). Se o mapa fonte tiver uma versão personalizada de um tilesheet já referenciado, ele será adicionada como uma tilesheet separado usado apenas por seus tiles.\n - Se você incluir o arquivo do tilesheet na sua pasta do mod, o Content Patcher usará esse arquivo automaticamente; caso contrário, ele será carregado na pasta Content/Maps do jogo.",
+			"type": "string",
+			"allOf": [
+				{
+					"not": {
+						"pattern": "\\.\\.[\\/\\\\]"
+					}
+				},
+				{
+					"pattern": "\\.([tT][bB][iI][nN]|[tT][mM][xX]|[xX][nN][bB])$"
+				}
+			]
+		},
+		"FromFileDescription3": {
+			"title": "Imagem fonte",
+			"description": "O caminho da imagem relativo a pasta do mod (como 'assets/klaus.png') ou vários caminhos delimitados por vírgula. Este campo suporta tokens e a capitalização não importa. Pode ser um arquivo .png (imagem) ou .xnb. Não deve conter subida de diretório ( ../ ).",
+			"type": "string",
+			"allOf": [
+				{
+					"not": {
+						"pattern": "\\.\\.[\\/\\\\]"
+					}
+				},
+				{
+					"pattern": "\\.([pP][nN][gG]|[xX][nN][bB])$"
+				}
+			]
+		},
+		"FromFileDescription4": {
+			"title": "Imagem fonte",
+			"description": "O caminho do arquivo relativo ao arquivo content.json (como 'assets/chages.json') ou vários caminhos delimitados por vírgula. Este campo suporta tokens e a capitalização não importa. Só aceita arquivos .json (dados). Não deve conter subida de diretório ( ../ ).\nEste campo irá carregar um arquivo .json neste local (Como se fosse um Ctrl + C em todo o arquivo seguido de um Ctrl + V exatamente aqui).\nLimitação: Este arquivo .json só deve ter dentro de si {\"Changes\":[PATCHES]}, onde PATCHES pode ser qualquer patch, funcionando como se estivesse aqui, e até mesmo outro Include, limitado apenas a não poder realizar loop (como arquivo A carrega B que carrega A). O arquivo pode ter formatação no .json.",
+			"type": "string",
+			"allOf": [
+				{
+					"not": {
+						"pattern": "\\.\\.[\\/\\\\]"
+					}
+				},
+				{
+					"pattern": "\\.[jJ][sS][oO][nN]$"
+				}
+			]
+		},
+		"FromArea": {
+			"title": "Área de origem",
+			"description": "A parte da imagem a ser copiada. O padrão é toda a imagem de origem. É definido como um objeto contendo as coordenadas X e Y, sendo a origem dessa coordenada o canto superior esquerdo, com a largura e a altura da área a ser copiada também definidos, todos os valores são definidos em pixels. Seus campos podem conter tokens",
+			"$ref": "#/definitions/Rectangle"
+		},
+		"FromAreaDescription2": {
+			"title": "Área de origem",
+			"description": "A parte do mapa fonte a ser copiada. O padrão é todo o mapa de origem.",
+			"$ref": "#/definitions/Rectangle"
+		},
+		"ToArea": {
+			"title": "Área de destino",
+			"description": "A parte da imagem-alvo a ser substituída. O padrão para a largura e altura é o tamanho de FromArea. É definido como um objeto contendo as coordenadas X e Y, sendo a origem dessa coordenada o canto superior esquerdo. Se você especificar uma área além das bordas inferior ou lateral-direita da imagem-alvo, a imagem copiada será redimensionada automaticamente para caber.",
+			"$ref": "#/definitions/Rectangle"
+		},
+		"ToAreaDescription2": {
+			"title": "Área de destino",
+			"description": "A parte do mapa-alvo a ser substituído. O padrão é o tamanho de FromArea começando no canto superior esquerdo.",
+			"$ref": "#/definitions/Rectangle"
+		},
+		"TargetField": {
+			"title": "Campo alvo",
+			"description": "Seleciona um campo dentro do arquivo como a Raiz, permitindo que você aplique mudanças a partir desta seleção. Consulte 'Target Field' na documentação do EditData para obter mais informações. Este campo suporta tokens.\nhttps://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/action-editdata.md#target-field\nExemplo: \"TargetField\": [ \"Crafts Room\", \"BundleSets\", \"#0\", \"Bundles\", \"#0\" ]",
+			"type": "array",
+			"items": {
+				"type": "string"
+			}
+		},
+		"Fields": {
+			"title": "Campo",
+			"description": "O campo individual que você deseja alterar. Essa opção suporta tokens nas chaves e nos valores de de um campo. A chave para cada campo é o índice do campo (começando em zero) para uma string delimitada por barra, ou o nome do campo para um objeto.",
+			"type": "object",
+			"additionalProperties": {
+				"type": ["object", "string", "null"]
+				}
+			
+		},
+		"Entries": {
+			"title": "Entradas",
+			"description": "As entradas no arquivo de dados que você deseja adicionar, substituir ou excluir. Se você deseja alterar apenas alguns campos, use Fields para melhor compatibilidade com outros mods. Para adicionar uma entrada, basta especificar uma chave que não existe; para excluir uma entrada, defina o valor como null ( \"Alguma Chave\": null ). Este campo suporta tokens em chaves e valores de entrada.\nCuidado: alguns arquivos XNB possuem campos extras no final para traduções; ao adicionar ou substituir uma entrada em todas as localidades, certifique-se de incluir os campos extras para evitar erros referentes a tradução.",
+			"type": "object",
+			"additionalProperties": {
+				"type": ["object", "string", "null"]
+			}
+		},
+		"MoveEntries": {
+			"title": "Mover entradas",
+			"description": "Altere a ordem de um entrada em um lista de recurso, como Data/MoviesReactions. (Usar isso em um recurso que não está listado causará um erro, pois ele não têm ordem.)\nVocê deve usar o ID junto de um e apenas um tipo de movimento: 'BeforeID', 'AfterID' ou 'ToPosition'.\nEx: \"Id\": \"Klaus\", \"BeforeID\": \"Lean\"",
+			"type": "array",
+			"items": {
+				"type": "object",
+
+				"properties": {
+					"ID": {
+						"title": "ID",
+						"description": "A identificação da entrada que será movida",
+						"type": "string"
+					}
+				},
+
+				"if": {"properties": {"ID": false}},
+				"then": {
+					"required": ["ID"]
+				},
+				"else": {
+					"if": {"properties": {"BeforeID": false}},
+					"then": {
+						"if": {"properties": {"AfterID": false}},
+						"then": {
+							"if": {"properties": {"ToPosition": false}},
+							"then": {
+								"properties": {
+									"BeforeID": {
+										"$ref": "#/definitions/BeforeID"
+									},
+									"AfterID": {
+										"$ref": "#/definitions/AfterID"
+									},
+									"ToPosition": {
+										"$ref": "#/definitions/ToPosition"
+									}
+								},
+								"required": ["BeforeID", "AfterID", "ToPosition"],
+								"propertyNames": {
+									"enum": ["ID", "BeforeID", "AfterID", "ToPosition"]
+								}
+							},
+							"else": {
+								"properties": {
+									"ToPosition": {
+										"$ref": "#/definitions/ToPosition"
+									}
+								},
+								"required": ["ToPosition"],
+								"propertyNames": {
+									"enum": ["ID", "ToPosition"]
+								}
+							}
+						},
+						"else": {
+							"properties": {
+								"AfterID": {
+									"$ref": "#/definitions/AfterID"
+								}
+							},
+							"required": ["AfterID"],
+							"propertyNames": {
+								"enum": ["ID", "AfterID"]
+							}
+						}
+					},
+					"else": {
+						"properties": {
+							"BeforeID": {
+								"$ref": "#/definitions/BeforeID"
+							}
+						},
+						"required": ["BeforeID"],
+						"propertyNames": {
+							"enum": ["ID", "BeforeID"]
+						}
+					}
+				}
+			}
+		},
+		"AddWarps": {
+			"title": "Adicionar warps (Teletransporte)",
+			"description": "Os valores dos Waps a serem adicionados ao local.\nCada warp deve corresponder ao formato da propriedade de Warp nos mapas do jogo (ou seja, 'fromX fromY targetMap targetX targetY', como '10 10 Town 0 30'.\nTraduzindo: 'origemX origemY mapaAlvo alvoX alvoY'",
+			"type": "array",
+			"items": {
+				"type": "string",
+				"pattern": "^\\-?\\d+\\s\\-?\\d+\\s[a-zA-Z0-9\\_]+\\s\\-?\\d+\\s\\-?\\d+$"
+			}
+		},
+		"MapProperties": {
+			"title": "Propriedades do mapa",
+			"description": "As propriedades do mapa (não as propriedades dos tiles) a serem adicionadas, substituídas ou excluídas. Para adicionar uma propriedade, basta especificar uma chave que não existe; para excluir uma entrada, defina o valor como null ( \"Alguma Chave\": null ). Este campo suporta tokens em chaves e valores de propriedade.",
+			"type": "object",
+			"additionalProperties": {
+				"type": ["string", "null"]
+			}
+		},
+		"MapTiles": {
+			"title": "Tiles do mapa",
+			"description": "Os tiles de mapas a serem adicionados, editados ou removidos. Todos os subcampos abaixo suportam tokens.",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"Layer": {
+						"title": "Layer",
+						"description": "O nome da camada do mapa a ser alterado.",
+						"type": "string"
+					},
+					"Position": {
+						"title": "Posição",
+						"description": "As coordenadas do tile a ser alterado. Você pode usar o modo de depuração para ver as coordenadas do tile dentro do jogo.",
+						"$ref": "#/definitions/Position"
+					},
+					"SetTilesheet": {
+						"title": "Definir tilesheet",
+						"description": "Define o ID do tilesheet para o índice de tile.",
+						"type": "string"
+					},
+					"SetIndex": {
+						"title": "Definir o Índice do tile",
+						"description": "Define o índice do tile no tilesheet.",
+						"type": ["string", "number"]
+					},
+					"SetProperties": {
+						"title": "Definir as propriedades do tile",
+						"description": "As propriedades a serem definidas ou removidas. Será mesclado com as propriedades existentes do tile, se houver. Para remover uma propriedade, defina seu valor como `null` (não \"null\" entre aspas).\nExemplo de exclusão: \"Water\": null",
+						"type": "object",
+						"additionalProperties": {
+							"type": ["string", "null"]
+						}
+					},
+					"Remove": {
+						"title": "Remover",
+						"description": "Define se o tile atual e todas as suas propriedades nessa camada serão excluidos antes de aplicar qualquer outro campo. Se combinado com os outros campos, você poderá criar um outro tile após a exclusão, como se o tile e suas propriedades originais nunca tivesse existido. O padrão é false.",
+						"type": "boolean"
+					}
+				},
+				"if": {
+					"properties": {"SetTilesheet": false}
+				},
+				"then": {
+					"if": {
+						"properties": {"SetIndex": false}
+					},
+					"else": {
+						"required": ["Layer", "Position", "SetTilesheet"]
+					}
+				},
+				"else": {
+					"required": ["Layer", "Position", "SetIndex"]
+				},
+				"required": ["Layer", "Position"],
+				"propertyNames": {
+					"enum": ["Layer", "Position", "SetTilesheet", "SetIndex", "SetProperties", "Remove"]
+				}
+			}
+		},
+		"When": {
+			"title": "Quando",
+			"description": "Aplique as condições necessárias para que ocorra a execução.",
+			"$ref": "#/definitions/Condition"
+		},
+		"PatchMode": {
+			"title": "Modo do Patch",
+			"description": "Como aplicar o FromArea no ToArea. O padrão é Replace (Substituir).\nValores permitidos: Replace (Substituir); Overlay (Sobrepor).",
+			"type": "string",
+			"enum": ["Replace", "Overlay"],
+			"default": "Replace"
+		},
+		"PatchModeDescription2": {
+			"title": "Modo do Patch",
+			"description": "Como aplicar o FromArea no ToArea em mapas. O padrão é ReplaceByLayer.\nValores permitidos: Overlay (Sobreposição), apenas vai sobrepor os tiles que possuem modificação nas suas devidas camadas. ReplaceByLayer (Substituir por layer), todos os tiles são substituidos, mas apenas nos layers modificados. Replace (Substituir), todos os tiles são substituidos (em todas os layers?)",
+			"type": "string",
+			"enum": ["Overlay", "Replace", "ReplaceByLayer"],
+			"default": "ReplaceByLayer"
+		},
+		"TextOperations": {
+			"title": "Operação de texto",
+			"description": "A operação de texto permite que você altere um campo de texto com base em seu valor atual, em vez de apenas substituir por um novo valor. Por exemplo, você pode adicionar algo antes ou depois do texto, sem precisar modificar o texto original.\nExemplo: https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/text-operations.md#example",
+			"type": "array",
+			"items": {
+				"type": "object",
+
+				"properties": {
+					"Operation": {
+						"title": "Operação",
+						"description": "A operação de texto a ser executada.\nA operação Append adiciona texto no final enquanto a operação Prepend adiciona texto no início, com um delimitador opcional entre o texto antigo e o novo\nA operação RemoveDelimited separa o texto-alvo em um conjunto de valores com base em um delimitador e, em seguida, remove um ou mais valores que correspondem ao texto de pesquisa fornecido.",
+						"enum": ["Append", "Prepend", "RemoveDelimited"]
+					}
+				},
+				"if": {
+					"properties": {
+						"Operation": false
+					}
+				},
+				"then": {
+					"required": ["Operation"],
+					"propertyNames": {
+						"enum": ["Operation"]
+					}
+				},
+				"else": {
+					"if": {
+						"properties": {
+							"Operation": {"const": "Append"}
+						}
+					},
+					"then": {
+						"properties": {
+							"Target": {
+								"$ref": "#/definitions/TextOperationTarget"
+							},
+							"Value": {
+								"$ref": "#/definitions/TextOperationValue"
+							},
+							"Delimiter": {
+								"$ref": "#/definitions/TextOperationDelimiter"
+							}
+						},
+						"required": ["Operation", "Target", "Value"],
+						"propertyNames": {
+							"enum": ["Operation", "Target", "Value", "Delimiter"]
+						}
+					},
+					"else": {
+						"if": {
+							"properties": {
+								"Operation": {"const": "Prepend"}
+							}
+						},
+						"then": {
+							"properties": {
+								"Target": {
+									"$ref": "#/definitions/TextOperationTarget"
+								},
+								"Value": {
+									"$ref": "#/definitions/TextOperationValue"
+								},
+								"Delimiter": {
+									"$ref": "#/definitions/TextOperationDelimiter"
+								}
+							},
+							"required": ["Operation", "Target", "Value"],
+							"propertyNames": {
+								"enum": ["Operation", "Target", "Value", "Delimiter"]
+							}
+						},
+						"else": {
+							"if": {
+								"properties": {
+									"Operation": {"const": "RemoveDelimited"}
+								}
+							},
+							"then": {
+								"properties": {
+									"Target": {
+										"$ref": "#/definitions/TextOperationTarget"
+									},
+									"Search": {
+										"$ref": "#/definitions/TextOperationSearch"
+									},
+									"Delimiter": {
+										"$ref": "#/definitions/TextOperationRemoveDelimiter"
+									},
+									"ReplaceMode": {
+										"$ref": "#/definitions/TextOperationReplaceMode"
+									}
+								},
+								"required": ["Operation", "Target", "Search", "Delimiter"],
+								"propertyNames": {
+									"enum": ["Operation", "Target", "Search", "Delimiter", "ReplaceMode"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"TextOperationsDescription2": {
+			"title": "Operação de texto em mapas",
+			"description": "A operação de texto permite que você altere o valor de alguma propriedade existente no mapa com base em seu valor atual, em vez de apenas substituir por um novo valor. O único valor permitido para o Target é [\"MapProperties\", \"PropertyName\"]\nTraduzindo: [\"Propriedades do mapa\", \"Nome da propriedade\"]\nExemplo: https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/text-operations.md#example",
+			"type": "array",
+			"items": {
+				"type": "object",
+
+				"properties": {
+					"Operation": {
+						"title": "Operação",
+						"description": "A operação de texto a ser executada.\nA operação Append adiciona texto no final enquanto a operação Prepend adiciona texto no início, com um delimitador opcional entre o texto antigo e o novo\nA operação RemoveDelimited separa o texto-alvo em um conjunto de valores com base em um delimitador e, em seguida, remove um ou mais valores que correspondem ao texto de pesquisa fornecido.",
+						"enum": ["Append", "Prepend", "RemoveDelimited"]
+					}
+				},
+				"if": {
+					"properties": {
+						"Operation": false
+					}
+				},
+				"then": {
+					"required": ["Operation"],
+					"propertyNames": {
+						"enum": ["Operation"]
+					}
+				},
+				"else": {
+					"if": {
+						"properties": {
+							"Operation": {"const": "Append"}
+						}
+					},
+					"then": {
+						"properties": {
+							"Target": {
+								"$ref": "#/definitions/TextOperationTargetMap"
+							},
+							"Value": {
+								"$ref": "#/definitions/TextOperationValue"
+							},
+							"Delimiter": {
+								"$ref": "#/definitions/TextOperationDelimiter"
+							}
+						},
+						"required": ["Operation", "Target", "Value"],
+						"propertyNames": {
+							"enum": ["Operation", "Target", "Value", "Delimiter"]
+						}
+					},
+					"else": {
+						"if": {
+							"properties": {
+								"Operation": {"const": "Prepend"}
+							}
+						},
+						"then": {
+							"properties": {
+								"Target": {
+									"$ref": "#/definitions/TextOperationTarget"
+								},
+								"Value": {
+									"$ref": "#/definitions/TextOperationValue"
+								},
+								"Delimiter": {
+									"$ref": "#/definitions/TextOperationDelimiter"
+								}
+							},
+							"required": ["Operation", "Target", "Value"],
+							"propertyNames": {
+								"enum": ["Operation", "Target", "Value", "Delimiter"]
+							}
+						},
+						"else": {
+							"if": {
+								"properties": {
+									"Operation": {"const": "RemoveDelimited"}
+								}
+							},
+							"then": {
+								"properties": {
+									"Target": {
+										"$ref": "#/definitions/TextOperationTarget"
+									},
+									"Search": {
+										"$ref": "#/definitions/TextOperationSearch"
+									},
+									"Delimiter": {
+										"$ref": "#/definitions/TextOperationRemoveDelimiter"
+									},
+									"ReplaceMode": {
+										"$ref": "#/definitions/TextOperationReplaceMode"
+									}
+								},
+								"required": ["Operation", "Target", "Search", "Delimiter"],
+								"propertyNames": {
+									"enum": ["Operation", "Target", "Search", "Delimiter", "ReplaceMode"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"TextOperationTarget": {
+			"title": "Alvo",
+			"description": "O campo de texto a ser alterado, especificado como um caminho de navegação estrutural. Cada valor representa um campo para o qual navegar. Os possíveis valores de caminho dependem do tipo de patch; consulte o campo Format nos documento TextOperations para obter mais informações. Este campo suporta tokens e letras maiúsculas não importam.\nTextOperations: https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/text-operations.md#format\nNavegação Estrutural: https://en.wikipedia.org/wiki/Breadcrumb_navigation",
+			"type": "array"
+		},
+		"TextOperationTargetMap": {
+			"title": "Alvo",
+			"description": "Define como alvo alguma propriedade do mapa, utilizando um caminho de navegação estrutural. O único valor permitido para o Target é [\"MapProperties\", \"PropertyName\"] onde PropertyName é o nome da propriedade do mapa a ser alterado\nTraduzindo: [\"Propriedades do mapa\", \"Nome da propriedade\"]\nNota: Os possíveis valores de caminho dependem do tipo de patch; consulte o campo Format nos documento TextOperations para obter mais informações.\nTextOperations: https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide/text-operations.md#format\nNavegação Estrutural: https://en.wikipedia.org/wiki/Breadcrumb_navigation",
+			"type": "array",
+			"maxItems": 2,
+			"minItems": 2
+		},
+		"TextOperationValue": {
+			"title": "Valor",
+			"description": "O texto a ser adicionado. Como a maioria dos campos do Content Patcher, os espaços em branco são cortados do início e do fim; use o Delimiter se precisar de um espaço entre os valores do texto e o texto adicionado por essa opção.\nEste campo suporta tokens e a capitalização não importa.",
+			"type": "string"
+		},
+		"TextOperationDelimiter": {
+			"title": "(Opcional) Delimitador",
+			"description": "Os caracteres a serem adicionados entre o texto e o texto adicionado pelo Value. Se você não especificar o delimitador, o padrão será uma barra \" / \" (na maioria dos assets) ou um circunflexo \" ^ \" (data/Achievements).\n(Obs. É ignorado quando o campo a receber a Operação de Texto estiver vazio.)",
+			"type": "string"
+		},
+		"TextOperationRemoveDelimiter": {
+			"title": "Delimitador",
+			"description": "Os caracteres utilizados para separar o texto em valores diferentes.\nEx: Considere o texto \"A a/B/C\" com o delimitador \" / \". os valores seriam: A a, B e C, cada um separado do outro. Se o delimitador fosse \" \", então teriamos: \"A\" no primeiro grupo e \"a/B/C\" no segundo grupo.",
+			"type": "string"
+		},
+		"TextOperationSearch": {
+			"title": "Pesquisa",
+			"description": "O valor a ser removido do texto. Somente removerá se todo o valor deste campo for correspontente. Não removerá substrings dentro de cada valor delimitado.\nEste campo oferece suporte a tokens e as letras maiúsculas SÃO importantes.",
+			"type": "string"
+		},
+		"TextOperationReplaceMode": {
+			"title": "(Opcional) Modo de exclusão",
+			"description": "Quais valores delimitados e correspondente à pesquisa devem ser removidos. O padrão é All (Todos).\nAs opções possíveis são: First, que remove o primeiro valor que corresponde à pesquisa. Last, que remove o ultimo valor que corresponde à pesquisa. All, que remove todos os valores que correspondem à pesquisa",
+			"enum": ["First", "Last", "All"]
+		},
+		"BeforeID": {
+			"title": "Antes do ID",
+			"description": "Sua entrada ficará antes deste ID",
+			"type": "string"
+		},
+		"AfterID": {
+			"title": "Depois do ID",
+			"description": "Sua entrada ficará depois deste ID",
+			"type": "string"
+		},
+		"ToPosition": {
+			"title": "Para a posição",
+			"description": "Mova a entrada para que fique exatamente nesta posição",
+			"enum": ["Top", "Bottom"]
+		}
+	},
+
+	"required": ["Format", "Changes"],
+	"additionalProperties": false
+}
