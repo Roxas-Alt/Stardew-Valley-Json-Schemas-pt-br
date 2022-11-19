@@ -136,7 +136,7 @@
 			},
 			"required": ["EntryDll", "ContentPackFor"],
 			"propertyNames": {
-				"enum": ["EntryDll", "ContentPackFor"]
+				"enum": ["$schema", "Name", "Author", "Version", "Description", "UniqueID", "MinimumApiVersion", "Dependencies", "UpdateKeys", "EntryDll", "ContentPackFor"]
 			}
 		},
 		"else": {
