@@ -1,15 +1,20 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "file:///C:/Schema/manifest.json",
+	"$id": "https://raw.githubusercontent.com/Roxas-Alt/Stardew-Valley-Json-Schemas-pt-br/main/manifest.json",
 	"title": "SMAPI manifest",
-	"description": "Arquivo Manifest para o SMAPI",
-	"@documentationUrl": "https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Manifest",
+	"description": "Arquivo Manifest para o SMAPI.\nPor: Roxas Alt\nDocumentação: https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Translation",
 
 	"allowComments": true,
 	"allowTrailingCommas": true,
 
 	"type": "object",
 	"properties": {
+		"$schema": {
+			"title": "Schema",
+			"description": "Uma referência para esse esquema JSON. Não faz parte do formato atual, mas é útil para ferramentas de validação.",
+			"type": "string",
+			"const": "https://raw.githubusercontent.com/Roxas-Alt/Stardew-Valley-Json-Schemas-pt-br/main/manifest.json"
+		},
 		"Name": {
 			"title": "Nome do Mod",
 			"description": "O nome de exibição do mod. O SMAPI usa isso em mensagens, logs e erros.",
@@ -108,12 +113,6 @@
 					"pattern": "Chave de atualização inválida; veja https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Manifest#Update_checks para mais informações."
 				}
 			}
-		},
-		"$schema": {
-			"title": "Schema",
-			"description": "Uma referência para esse esquema JSON. Não faz parte do formato atual, mas é útil para ferramentas de validação.",
-			"type": "string",
-			"const": "file:///C:/Schema/manifest.json"
 		}
 	},
 	"definitions": {

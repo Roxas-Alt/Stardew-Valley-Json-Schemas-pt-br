@@ -1,9 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "file:///C:/Schema/i18n.json",
-	"title": "Arquivo i18n do SMAPI",
-	"description": "Um arquivo de tradução para um mod ou pacote de conteúdo do SMAPI.",
-	"@documentationUrl": "https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Translation",
+	"$id": "https://raw.githubusercontent.com/Roxas-Alt/Stardew-Valley-Json-Schemas-pt-br/main/i18n.json",
+	"title": "Arquivo i18n",
+	"description": "Um arquivo de tradução para um mod do SMAPI.\nPor: Roxas Alt\nDocumentação: https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Translation",
 
 	"allowComments": true,
 	"allowTrailingCommas": true,
@@ -14,21 +13,11 @@
 			"title": "Schema",
 			"description": "Uma referência para esse esquema JSON. Não faz parte do formato atual, mas é útil para ferramentas de validação.",
 			"type": "string",
-			"const": "file:///C:/Schema/i18n.json"
+			"const": "https://raw.githubusercontent.com/Roxas-Alt/Stardew-Valley-Json-Schemas-pt-br/main/i18n.json"
 		}
 	},
 
 	"additionalProperties": {
-		"type": "string",
-		"@errorMessages": {
-			"type": "Propriedade inválida. Os arquivos de tradução só podem conter textos."
-		}
+		"type": "string"
 	}
 }
-/*
-se a null
-	então se b null
-			então nada
-			senão requer a
-	senão requer b
-*/
