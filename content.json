@@ -16,7 +16,8 @@
 			"title": "Versão do Content Patcher",
 			"description": "A versão do Content Patcher a ser utilizada. Você deve sempre usar a versão mais recente para habilitar os recursos mais recentes, evitar comportamentos obsoletos e reduzir o tempo de carregamento.\nVersão atual: 1.28.0 ou 1.28.3",
 			"type": "string",
-			"pattern": "^1\\.28\\.[0-3]$"
+			"pattern": "^1\\.28\\.[0-3]$",
+			"examples": ["1.28.0", "1.20.3"]
 		},
 		"ConfigSchema": {
 			"title": "Esquema de configuração",
@@ -115,7 +116,7 @@
 							"type": "string"
 						}
 					},
-					"When":{
+					"When": {
 						"$ref": "#/definitions/When"
 					}
 				},
@@ -172,12 +173,12 @@
 					}
 				},
 
-				"if": {"properties": {"Action": false}},
+				"if": { "properties": { "Action": false } },
 				"then": {
 					"required": ["Action"]
 				},
 				"else": {
-					"if": {"properties": {"Action": {"const": "Load"}}},
+					"if": { "properties": { "Action": { "const": "Load" } } },
 					"then": {
 						"properties": {
 							"FromFile": {
@@ -202,7 +203,7 @@
 						}
 					},
 					"else": {
-						"if": {"properties": {"Action": {"const": "EditImage"}}},
+						"if": { "properties": { "Action": { "const": "EditImage" } } },
 						"then": {
 							"properties": {
 								"PatchMode": {
@@ -236,7 +237,7 @@
 							}
 						},
 						"else": {
-							"if": {"properties": {"Action": {"const": "EditData"}}},
+							"if": { "properties": { "Action": { "const": "EditData" } } },
 							"then": {
 								"properties": {
 									"LogName": {
@@ -286,7 +287,7 @@
 								}
 							},
 							"else": {
-								"if": {"properties": {"Action": {"const": "EditMap"}}},
+								"if": { "properties": { "Action": { "const": "EditMap" } } },
 								"then": {
 									"properties": {
 										"FromFile": {
@@ -338,7 +339,7 @@
 										}
 									},
 									"then": {
-										"required": ["FromFile","MapProperties","AddWarps","TextOperations","MapTiles"]
+										"required": ["FromFile", "MapProperties", "AddWarps", "TextOperations", "MapTiles"]
 									},
 
 									"propertyNames": {
@@ -346,7 +347,7 @@
 									}
 								},
 								"else": {
-									"if": {"properties": {"Action": {"const": "Include"}}},
+									"if": { "properties": { "Action": { "const": "Include" } } },
 									"then": {
 										"properties": {
 											"FromFile": {
@@ -548,8 +549,7 @@
 			"type": "object",
 			"additionalProperties": {
 				"type": ["object", "string", "null"]
-				}
-			
+			}
 		},
 		"Entries": {
 			"title": "Entradas",
@@ -574,16 +574,16 @@
 					}
 				},
 
-				"if": {"properties": {"ID": false}},
+				"if": { "properties": { "ID": false } },
 				"then": {
 					"required": ["ID"]
 				},
 				"else": {
-					"if": {"properties": {"BeforeID": false}},
+					"if": { "properties": { "BeforeID": false } },
 					"then": {
-						"if": {"properties": {"AfterID": false}},
+						"if": { "properties": { "AfterID": false } },
 						"then": {
-							"if": {"properties": {"ToPosition": false}},
+							"if": { "properties": { "ToPosition": false } },
 							"then": {
 								"properties": {
 									"BeforeID": {
@@ -698,11 +698,11 @@
 					}
 				},
 				"if": {
-					"properties": {"SetTilesheet": false}
+					"properties": { "SetTilesheet": false }
 				},
 				"then": {
 					"if": {
-						"properties": {"SetIndex": false}
+						"properties": { "SetIndex": false }
 					},
 					"else": {
 						"required": ["Layer", "Position", "SetTilesheet"]
@@ -764,7 +764,7 @@
 				"else": {
 					"if": {
 						"properties": {
-							"Operation": {"const": "Append"}
+							"Operation": { "const": "Append" }
 						}
 					},
 					"then": {
@@ -787,7 +787,7 @@
 					"else": {
 						"if": {
 							"properties": {
-								"Operation": {"const": "Prepend"}
+								"Operation": { "const": "Prepend" }
 							}
 						},
 						"then": {
@@ -810,7 +810,7 @@
 						"else": {
 							"if": {
 								"properties": {
-									"Operation": {"const": "RemoveDelimited"}
+									"Operation": { "const": "RemoveDelimited" }
 								}
 							},
 							"then": {
@@ -866,7 +866,7 @@
 				"else": {
 					"if": {
 						"properties": {
-							"Operation": {"const": "Append"}
+							"Operation": { "const": "Append" }
 						}
 					},
 					"then": {
@@ -889,7 +889,7 @@
 					"else": {
 						"if": {
 							"properties": {
-								"Operation": {"const": "Prepend"}
+								"Operation": { "const": "Prepend" }
 							}
 						},
 						"then": {
@@ -912,7 +912,7 @@
 						"else": {
 							"if": {
 								"properties": {
-									"Operation": {"const": "RemoveDelimited"}
+									"Operation": { "const": "RemoveDelimited" }
 								}
 							},
 							"then": {

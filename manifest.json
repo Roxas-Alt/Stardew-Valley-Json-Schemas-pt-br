@@ -36,7 +36,7 @@
 			"title": "Descrição do Mod",
 			"description": "Uma breve explicação sobre o que seu mod faz (uma ou duas frases), mostrada no log SMAPI.",
 			"type": "string",
-			"examples": ["View metadata about anything by pressing a button."]
+			"examples": ["Pressione um botão para visualizar informações sobre as coisas."]
 		},
 		"UniqueID": {
 			"title": "ID exclusivo do Mod",
@@ -126,13 +126,13 @@
 
 	"required": ["Name", "Author", "Version", "Description", "UniqueID"],
 
-	"if": {"properties": {"EntryDll": false}},
+	"if": { "properties": { "EntryDll": false } },
 	"then": {
-		"if": {"properties": {"ContentPackFor": false}},
+		"if": { "properties": { "ContentPackFor": false } },
 		"then": {
 			"properties": {
-				"EntryDll": {"$ref": "#/definitions/EntryDll"},
-				"ContentPackFor": {"$ref": "#/definitions/ContentPackFor"}
+				"EntryDll": { "$ref": "#/definitions/EntryDll" },
+				"ContentPackFor": { "$ref": "#/definitions/ContentPackFor" }
 			},
 			"required": ["EntryDll", "ContentPackFor"],
 			"propertyNames": {
@@ -141,7 +141,7 @@
 		},
 		"else": {
 			"properties": {
-				"ContentPackFor": {"$ref": "#/definitions/ContentPackFor"}
+				"ContentPackFor": { "$ref": "#/definitions/ContentPackFor" }
 			},
 			"propertyNames": {
 				"enum": ["$schema", "Name", "Author", "Version", "Description", "UniqueID", "MinimumApiVersion", "Dependencies", "UpdateKeys", "ContentPackFor"]
@@ -150,7 +150,7 @@
 	},
 	"else": {
 		"properties": {
-			"EntryDll": {"$ref": "#/definitions/EntryDll"}
+			"EntryDll": { "$ref": "#/definitions/EntryDll" }
 		},
 		"propertyNames": {
 			"enum": ["$schema", "Name", "Author", "Version", "Description", "UniqueID", "MinimumApiVersion", "Dependencies", "UpdateKeys", "EntryDll"]
